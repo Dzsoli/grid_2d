@@ -1,7 +1,8 @@
 from BPtools.trainer.bptrainer import BPTrainer
 from BPtools.utils.models import *
+from BPtools.utils.datamoduls import *
 from BPtools.metrics.criterions import KLD_BCE_loss_2Dvae
-from modelv3 import *
+# from modelv3 import *
 
 # import bpoolsból, ha kell
 from torchvision.utils import make_grid, save_image
@@ -20,13 +21,19 @@ model_path = {"vae_gauss": "log_VAE_gauss_lam01_refined_model_v3/model_state_dic
 
 
 # Beolvasni a modelleket
-enc = Encoder2D_v3()
-enc2 = Type2_Encoder2D_v3()
-dec = Decoder2D_v3()
-disc = Discriminator2D_Latent3_v3()
+# ezek át lettek téve a BPtools-ba
+# enc = Encoder2D_v3()
+# enc2 = Type2_Encoder2D_v3()
+# dec = Decoder2D_v3()
+# disc = Discriminator2D_Latent3_v3()
+
+enc = GridEncoder2D_Gauss()
+enc2 = GridEncoder2D_Bernoulli()
+dec = GridDecoder2D()
+disc = GridLatentDiscriminator2D()
 
 
-vae_gauss = VAE2D(encoder=enc, decoder=dec)
+vae_gauss = VAE2D_Gauss(encoder=enc, decoder=dec)
 vae_bernoulli = VAE2D_Bernoulli(encoder=enc2, decoder=dec)
 aae_uniform = ADVAE2D_Uniform(encoder=enc, decoder=dec, discriminator=disc)
 aae_gauss = ADVAE2D_Gauss(encoder=enc, decoder=dec, discriminator=disc)
@@ -64,6 +71,9 @@ for key, model in model_dict.items():
     table = torch.cat((table, boundary_for_grid(out).unsqueeze(0)), dim=0)
     # print(interp)
     # print(interp.shape)
+
+# csak kimenteni az encoder adatait:
+torch.save(model_dict["aae_gauss"].encoder.state_dict(), 'aae_gauss_grid_encoder_param')
 
 table = table.transpose(dim0=0, dim1=1)
 table = table.reshape((16*5,1,18,130))

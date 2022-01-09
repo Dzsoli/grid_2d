@@ -751,7 +751,7 @@ class VAE2D_Bernoulli(BPModule):
         return (ind - p).detach() + p
 
     def forward(self, x):
-        p = self.encoder(x)
+        p = self.encoder(x.repeat(1,3,1,1)).view((x.shape[0],1,4,16))
         z = self.sampler(p)
         # print(z.shape, mu.shape, logvar.shape)
         pred = self.decoder(z)  # return h
